@@ -360,20 +360,36 @@ function getInitials($name) {
                                     <input type="hidden" name="id" value="<?php echo $row['id']; ?>"><input type="hidden" name="action" value="accept">
                                     <button type="submit" class="action-btn" title="Confirm Order"><i class="fas fa-check"></i></button>
                                 </form>
+                                <form method="POST" action="update_order.php" style="display:inline;" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                                    <input type="hidden" name="id" value="<?php echo $row['id']; ?>"><input type="hidden" name="action" value="cancel">
+                                    <button type="submit" class="action-btn" title="Cancel Order" style="color: #c62828;"><i class="fas fa-times"></i></button>
+                                </form>
                             <?php elseif ($status_class === 'confirmed') : ?>
                                 <form method="POST" action="update_order.php" style="display:inline;">
                                     <input type="hidden" name="id" value="<?php echo $row['id']; ?>"><input type="hidden" name="action" value="processing">
                                     <button type="submit" class="action-btn" title="Prepare Order"><i class="fas fa-utensils"></i></button>
+                                </form>
+                                <form method="POST" action="update_order.php" style="display:inline;" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                                    <input type="hidden" name="id" value="<?php echo $row['id']; ?>"><input type="hidden" name="action" value="cancel">
+                                    <button type="submit" class="action-btn" title="Cancel Order" style="color: #c62828;"><i class="fas fa-times"></i></button>
                                 </form>
                             <?php elseif ($status_class === 'processing') : ?>
                                 <form method="POST" action="update_order.php" style="display:inline;">
                                     <input type="hidden" name="id" value="<?php echo $row['id']; ?>"><input type="hidden" name="action" value="out_for_delivery">
                                     <button type="submit" class="action-btn" title="Ship Order"><i class="fas fa-motorcycle"></i></button>
                                 </form>
+                                <form method="POST" action="update_order.php" style="display:inline;" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                                    <input type="hidden" name="id" value="<?php echo $row['id']; ?>"><input type="hidden" name="action" value="cancel">
+                                    <button type="submit" class="action-btn" title="Cancel Order" style="color: #c62828;"><i class="fas fa-times"></i></button>
+                                </form>
                             <?php elseif ($status_class === 'out-for-delivery') : ?>
                                 <form method="POST" action="update_order.php" style="display:inline;">
                                     <input type="hidden" name="id" value="<?php echo $row['id']; ?>"><input type="hidden" name="action" value="completed">
                                     <button type="submit" class="action-btn" title="Mark as Delivered"><i class="fas fa-check-double"></i></button>
+                                </form>
+                                <form method="POST" action="update_order.php" style="display:inline;" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                                    <input type="hidden" name="id" value="<?php echo $row['id']; ?>"><input type="hidden" name="action" value="cancel">
+                                    <button type="submit" class="action-btn" title="Cancel Order" style="color: #c62828;"><i class="fas fa-times"></i></button>
                                 </form>
                             <?php endif; ?>
 
