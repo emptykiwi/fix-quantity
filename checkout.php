@@ -1,0 +1,390 @@
+<?php
+session_start();
+require_once 'db_connect.php';
+
+// Pre-fill user data if logged in
+$user_fullname = $_SESSION['fullname'] ?? '';
+$user_contact = $_SESSION['contact'] ?? '';
+$user_address = $_SESSION['address'] ?? '';
+
+// Fetch suggestions (3 random products with stock)
+$suggestions = [];
+$sug_res = $conn->query("SELECT * FROM products WHERE stock > 0 ORDER BY RAND() LIMIT 3");
+if ($sug_res) {
+    while ($row = $sug_res->fetch_assoc()) {
+        $suggestions[] = $row;
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="Logo_Brand.png">
+    <title>Checkout - Cafe Emmanuel</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #A05E44;
+            --secondary: #2C1E16;
+            --accent: #D4A373;
+            --bg-main: #F8F4EE;
+            --bg-card: #FFFFFF;
+            --text-dark: #3A2B24;
+            --text-muted: #756358;
+            --border-color: #E6DCD3;
+            --font-heading: 'Playfair Display', serif;
+            --font-body: 'Poppins', sans-serif;
+            --shadow: 0 10px 40px rgba(44, 30, 22, 0.05);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-body); background-color: var(--bg-main); color: var(--text-dark); line-height: 1.6; }
+
+        /* NAVBAR */
+        .navbar { background: var(--secondary); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .navbar-brand { display: flex; align-items: center; text-decoration: none; gap: 12px; }
+        .navbar-brand img { height: 50px; width: auto; }
+        .navbar-brand span { font-family: var(--font-heading); color: var(--accent); font-size: 22px; font-weight: 700; letter-spacing: 1px; }
+        .back-link { color: white; text-decoration: none; font-weight: 500; transition: 0.3s; }
+        .back-link:hover { color: var(--accent); }
+
+        /* LAYOUT */
+        .checkout-container { max-width: 1100px; margin: 60px auto; padding: 0 20px; }
+        .page-title { font-family: var(--font-heading); font-size: 36px; color: var(--secondary); margin-bottom: 40px; text-align: center; position: relative; }
+        .page-title::after { content: ''; display: block; width: 60px; height: 3px; background: var(--primary); margin: 15px auto 0; }
+
+        .checkout-wrapper { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; align-items: start; }
+        .card { background: var(--bg-card); border-radius: 16px; padding: 30px; box-shadow: var(--shadow); border: 1px solid rgba(160, 94, 68, 0.05); }
+        .card h3 { font-family: var(--font-heading); font-size: 22px; color: var(--secondary); margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+
+        /* FORM STYLES */
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary); font-size: 14px; }
+        .form-control { width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 8px; font-family: var(--font-body); font-size: 15px; transition: 0.3s; background: var(--bg-main); }
+        .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(160, 94, 68, 0.1); background: #fff; }
+        textarea.form-control { resize: vertical; min-height: 100px; }
+
+        /* PAYMENT OPTIONS */
+        .payment-options { display: flex; flex-direction: column; gap: 15px; }
+        .payment-option { display: flex; align-items: center; padding: 15px; border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: 0.3s; }
+        .payment-option:hover { border-color: var(--primary); background: rgba(160, 94, 68, 0.02); }
+        .payment-option input[type="radio"] { margin-right: 15px; accent-color: var(--primary); transform: scale(1.2); }
+        .payment-option label { cursor: pointer; font-weight: 600; width: 100%; display: flex; justify-content: space-between; align-items: center; margin: 0;}
+        .payment-icon { font-size: 20px; color: var(--primary); }
+
+        /* SUMMARY STYLES */
+        .summary-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed var(--border-color); font-size: 14px; }
+        .summary-item:last-child { border-bottom: none; }
+        .summary-item span:last-child { font-weight: 600; color: var(--secondary); }
+        .summary-total { display: flex; justify-content: space-between; margin-top: 20px; padding-top: 20px; border-top: 2px solid var(--border-color); font-size: 20px; font-weight: 700; font-family: var(--font-heading); color: var(--primary); }
+
+        /* BUTTONS */
+        .btn-submit { width: 100%; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 700; font-family: var(--font-body); font-size: 16px; margin-top: 30px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-submit:hover { background: var(--secondary); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .btn-submit:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* SUGGESTIONS */
+        .suggestions-section { margin-top: 50px; }
+        .suggestions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }
+        .suggestion-card { background: white; border-radius: 12px; padding: 15px; box-shadow: var(--shadow); border: 1px solid var(--border-color); display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .suggestion-img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; }
+        .suggestion-name { font-size: 15px; font-weight: 600; color: var(--secondary); margin-bottom: 5px; height: 45px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .suggestion-price { color: var(--primary); font-weight: 700; margin-bottom: 15px; }
+        .btn-add-suggestion { background: var(--bg-main); color: var(--primary); border: 1px solid var(--primary); padding: 8px 15px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.3s; width: 100%; }
+        .btn-add-suggestion:hover { background: var(--primary); color: white; }
+
+        @media (max-width: 900px) { .checkout-wrapper { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="index.php" class="navbar-brand">
+        <img src="Logo_Brand.png" alt="Cafe Emmanuel" onerror="this.src='logo.png'">
+        <span>CAFE EMMANUEL</span>
+    </a>
+    <a href="cart.php" class="back-link"><i class="fas fa-arrow-left"></i> Back to Cart</a>
+</nav>
+
+<main class="checkout-container">
+    <h1 class="page-title">Checkout</h1>
+
+    <div class="checkout-wrapper">
+        <div class="card">
+            <h3>Delivery Details</h3>
+            <form id="checkoutForm">
+                <div class="form-group">
+                    <label for="fullname">Full Name</label>
+                    <input type="text" id="fullname" name="fullname" class="form-control" value="<?php echo htmlspecialchars($user_fullname); ?>" required placeholder="e.g. John Doe">
+                </div>
+                
+                <div class="form-group">
+                    <label for="contact">Contact Number</label>
+                    <input type="text" id="contact" name="contact" class="form-control" value="<?php echo htmlspecialchars($user_contact); ?>" required placeholder="e.g. 09123456789">
+                </div>
+
+                <div class="address-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="municipality">Municipality <span style="color:red">*</span></label>
+                        <select id="municipality" name="municipality" class="form-control" required>
+                            <option value="" disabled selected>Select Municipality</option>
+                            <option value="Guagua">Guagua</option>
+                            <option value="Lubao">Lubao</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="barangay">Barangay <span style="color:red">*</span></label>
+                        <select id="barangay" name="barangay" class="form-control" required disabled>
+                            <option value="" disabled selected>Select Municipality First</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="purok">Purok / Street <span style="color:red">*</span></label>
+                        <input type="text" id="purok" name="purok" class="form-control" required placeholder="e.g. Purok 3 / Mac Arthur Highway">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="house_number">House Number / Bldg <span style="color:red">*</span></label>
+                        <input type="text" id="house_number" name="house_number" class="form-control" required placeholder="e.g. 143 or N/A">
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 40px;">Payment Method</h3>
+                <div class="payment-options">
+                    <label class="payment-option">
+                        <input type="radio" name="payment" value="COD" checked>
+                        <span>Cash on Delivery (COD)</span>
+                        <i class="fas fa-money-bill-wave payment-icon"></i>
+                    </label>
+                    <label class="payment-option">
+                        <input type="radio" name="payment" value="GCash">
+                        <span>GCash (PayMongo)</span>
+                        <img src="https://getlogovector.com/wp-content/uploads/2020/11/gcash-logo-vector.png" alt="GCash" style="height:20px;">
+                    </label>
+                    <label class="payment-option">
+                        <input type="radio" name="payment" value="GrabPay">
+                        <span>GrabPay (PayMongo)</span>
+                        <i class="fas fa-wallet payment-icon"></i>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    Place Order <i class="fas fa-check-circle"></i>
+                </button>
+            </form>
+        </div>
+
+        <div class="card" style="position: sticky; top: 100px;">
+            <h3>Order Summary</h3>
+            <div id="summaryItemsContainer"></div>
+            
+            <div class="summary-total">
+                <span>Total Amount</span>
+                <span id="summaryTotalAmount">₱0.00</span>
+            </div>
+        </div>
+    </div>
+
+    <?php if (!empty($suggestions)): ?>
+    <section class="suggestions-section">
+        <h2 class="page-title" style="font-size: 28px;">Want to add more?</h2>
+        <div class="suggestions-grid">
+            <?php foreach ($suggestions as $item): ?>
+            <div class="suggestion-card">
+                <img src="<?php echo htmlspecialchars($item['image']); ?>" class="suggestion-img" onerror="this.src='logo.png'">
+                <div class="suggestion-name"><?php echo htmlspecialchars($item['name']); ?></div>
+                <div class="suggestion-price">₱<?php echo number_format($item['price'], 2); ?></div>
+                <button type="button" class="btn-add-suggestion" onclick='addSuggestion(<?php echo json_encode($item); ?>)'>
+                    <i class="fas fa-plus"></i> Add to Order
+                </button>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </section>
+    <?php endif; ?>
+</main>
+
+<script>
+    // Address Data
+    const barangays = {
+        "Guagua": [
+            "Ascomo", "Bancal", "Betis", "Bancal Pugad", "Bulaon", "Cabalantian", "Cabangcalan", "Cadutdut", "Ebus", 
+            "Lambac", "Magsaysay", "Maquiapo", "Natividad", "Plaza Burgos", "Pulungmasle", "Rizal", "San Agustin", 
+            "San Antonio", "San Isidro", "San Jose", "San Juan 1st", "San Juan Nepomuceno", "San Matias", "San Miguel", 
+            "San Nicolas 1st", "San Nicolas 2nd", "San Pablo", "San Pedro", "San Rafael", "San Roque", "San Vicente", 
+            "Santa Filomena", "Santa Ines", "Santa Ursula", "Santo Cristo", "Santo Niño"
+        ].sort(),
+        "Lubao": [
+            "Bancal Sinubli", "Bancal Pugad", "Baruya", "Calangain", "Concepcion", "De La Paz", "Del Carmen", 
+            "Don Ignacio Dimson", "Lourdes", "Prado Siongco", "Remedios", "San Agustin", "San Antonio", "San Francisco", 
+            "San Isidro", "San Jose Apunan", "San Jose Gumi", "San Juan", "San Matias", "San Miguel", "San Nicolas 1st", 
+            "San Nicolas 2nd", "San Pablo 1st", "San Pablo 2nd", "San Pedro Palcarangan", "San Pedro Saug", "San Roque Arbol", 
+            "San Roque Dau", "San Vicente", "Santa Barbara", "Santa Catalina", "Santa Cruz", "Santa Lucia", "Santa Maria", 
+            "Santa Monica", "Santa Rita", "Santa Teresa 1st", "Santa Teresa 2nd", "Santiago", "Santo Cristo", "Santo Niño", "Santo Tomas"
+        ].sort()
+    };
+
+    // Initialize address dropdowns
+    document.addEventListener('DOMContentLoaded', () => {
+        const municipalitySelect = document.getElementById('municipality');
+        const barangaySelect = document.getElementById('barangay');
+
+        municipalitySelect.addEventListener('change', function() {
+            const selectedMunicipality = this.value;
+            barangaySelect.innerHTML = '<option value="" disabled selected>Select Barangay</option>';
+            
+            if (selectedMunicipality && barangays[selectedMunicipality]) {
+                barangays[selectedMunicipality].forEach(brgy => {
+                    const option = document.createElement('option');
+                    option.value = brgy;
+                    option.textContent = brgy;
+                    barangaySelect.appendChild(option);
+                });
+                barangaySelect.disabled = false;
+            } else {
+                barangaySelect.disabled = true;
+            }
+        });
+    });
+
+    // Global variable for grand total so suggestions can update it
+    let grandTotal = 0;
+    let cart = [];
+
+    function renderSummary() {
+        const container = document.getElementById('summaryItemsContainer');
+        const totalDisplay = document.getElementById('summaryTotalAmount');
+        container.innerHTML = '';
+        grandTotal = 0;
+
+        cart.forEach(item => {
+            const price = parseFloat(item.price) || 0;
+            const quantity = parseInt(item.quantity) || 1;
+            const subtotal = price * quantity;
+            grandTotal += subtotal;
+
+            const div = document.createElement('div');
+            div.className = 'summary-item';
+            div.innerHTML = `
+                <span>${quantity}x ${item.name} ${item.size ? `(${item.size})` : ''}</span>
+                <span>₱${subtotal.toFixed(2)}</span>
+            `;
+            container.appendChild(div);
+        });
+
+        totalDisplay.textContent = `₱${grandTotal.toFixed(2)}`;
+    }
+
+    function addSuggestion(product) {
+        // Check if already in cart
+        const existing = cart.find(item => item.id === product.id && (!item.size || item.size === 'Standard'));
+        if (existing) {
+            existing.quantity += 1;
+        } else {
+            cart.push({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                quantity: 1,
+                image: product.image,
+                size: 'Standard'
+            });
+        }
+        localStorage.setItem('cart', JSON.stringify(cart));
+        renderSummary();
+        alert(product.name + " added to your order!");
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // 1. Load cart from LocalStorage
+        cart = JSON.parse(localStorage.getItem('cart')) || [];
+        
+        if (cart.length === 0) {
+            alert("Your cart is empty. Redirecting to menu...");
+            window.location.href = "index.php";
+            return;
+        }
+
+        // 2. Render Order Summary
+        renderSummary();
+
+        // 3. Handle Form Submission
+        const form = document.getElementById('checkoutForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Disable button to prevent double clicks
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Processing... <i class="fas fa-spinner fa-spin"></i>';
+
+            // Get Form Data
+            const formData = new FormData(form);
+            const paymentMethod = formData.get('payment');
+
+            // Build Payload specifically for place_order.php
+            // Combine address fields
+            const houseNo = formData.get('house_number');
+            const purok = formData.get('purok');
+            const brgy = formData.get('barangay');
+            const muni = formData.get('municipality');
+            
+            const combinedAddress = `${houseNo}, ${purok}, Brgy. ${brgy}, ${muni}, Pampanga`;
+
+            const payload = {
+                fullname: formData.get('fullname'),
+                contact: formData.get('contact'),
+                address: combinedAddress,
+                payment: paymentMethod,
+                cart: cart,     // your place_order.php expects 'cart' or 'items'
+                total: grandTotal
+            };
+
+            // Send via AJAX to your existing working place_order script
+            fetch('place_order.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Clear LocalStorage Cart since order is placed
+                    localStorage.removeItem('cart');
+
+                    // If PayMongo generated a checkout URL (GCash/GrabPay)
+                    if (data.checkout_url) {
+                        window.location.href = data.checkout_url;
+                    } else {
+                        // Standard COD success
+                        alert(data.message || 'Order placed successfully!');
+                        window.location.href = 'my_orders.php';
+                    }
+                } else {
+                    alert('Error: ' + (data.message || 'Something went wrong.'));
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Place Order <i class="fas fa-check-circle"></i>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('A network error occurred. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Place Order <i class="fas fa-check-circle"></i>';
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
