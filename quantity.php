@@ -205,9 +205,11 @@ header("Expires: 0");
             </ul>
             
             <div class="nav-right-cluster">
-                <a href="cart.php" class="nav-icon-btn" title="View Cart">
-                    <i class="fas fa-shopping-cart"></i>
-                </a>
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <a href="cart.php" class="nav-icon-btn" title="View Cart"><i class="fas fa-shopping-cart"></i></a>
+                <?php else: ?>
+                    <a href="#" onclick="openModal('loginModal')" class="nav-icon-btn" title="View Cart"><i class="fas fa-shopping-cart"></i></a>
+                <?php endif; ?>
 
                 <div class="nav-icon-btn">
                     <?php if (isset($_SESSION['user_id'])) { include 'notification_bell.php'; } else { echo '<i class="fas fa-bell"></i>'; } ?>
@@ -491,10 +493,14 @@ header("Expires: 0");
         }
 
         function buyNow() {
-            document.querySelector('.btn-add-cart').click(); 
-            setTimeout(() => {
-                window.location.href = 'cart.php';
-            }, 500);
+            <?php if (!isset($_SESSION['user_id'])): ?>
+                openModal('loginModal');
+            <?php else: ?>
+                document.querySelector('.btn-add-cart').click();
+                setTimeout(() => {
+                    window.location.href = 'cart.php';
+                }, 500);
+            <?php endif; ?>
         }
 
         // Pairing Logic

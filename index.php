@@ -726,7 +726,11 @@ if ($product_res) {
                 <?php endif; ?>
             </ul>
             <div class="nav-right-cluster">
-                <a href="cart.php" class="nav-icon-btn" title="View Cart"><i class="fas fa-shopping-cart"></i></a>
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <a href="cart.php" class="nav-icon-btn" title="View Cart"><i class="fas fa-shopping-cart"></i></a>
+                <?php else: ?>
+                    <a href="#" onclick="openModal('loginModal')" class="nav-icon-btn" title="View Cart"><i class="fas fa-shopping-cart"></i></a>
+                <?php endif; ?>
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <div class="nav-icon-btn" title="Notifications">
                         <?php include 'notification_bell.php'; ?>
