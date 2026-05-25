@@ -47,21 +47,20 @@ header("Expires: 0");
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
         a { text-decoration: none; transition: 0.3s; color: inherit; }
 
-        /* --- Header & Navigation --- */
-        .header { position: fixed; width: 100%; top: 0; z-index: 1000; height: var(--nav-height); background: rgba(26, 18, 11, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        .navbar { display: flex; justify-content: space-between; align-items: center; height: 100%; }
-        .nav-logo { display: flex; align-items: center; color: var(--white); }
-        .logo-cafe { font-family: var(--font-logo-cafe); font-size: 32px; letter-spacing: -1px; }
-        .logo-emmanuel { font-family: var(--font-logo-emmanuel); font-size: 38px; margin-left: 8px; color: var(--primary-color); font-weight: 500; }
+                /* --- Header & Navigation --- */
+        .header { position: fixed; width: 100%; top: 0; z-index: 1000; height: var(--nav-height); background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); box-shadow: 0 4px 30px rgba(44,30,22,0.1); border-bottom: 1px solid rgba(160,94,68,0.1); }
+        .navbar { display: flex; justify-content: space-between; align-items: center; height: 100%; width: 100%; }
+        .nav-logo { display: flex; align-items: center; }
+        .nav-logo img { height: 90px; object-fit: contain; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.1)); transition: all 0.3s; }
         
         .nav-menu { display: flex; list-style: none; gap: 3rem; }
-        .nav-link { font-family: var(--font-nav); font-size: 16px; font-weight: 600; color: #E0E0E0; text-decoration: none; transition: color 0.3s ease; position: relative; }
-        .nav-link:hover, .nav-link.active { color: var(--footer-link-hover); }
+        .nav-link { font-family: var(--font-nav); font-size: 15px; font-weight: 600; color: var(--secondary-color); text-transform: uppercase; text-decoration: none; transition: color 0.3s ease; position: relative; }
+        .nav-link:hover, .nav-link.active { color: var(--primary-color); }
         
         .nav-right-cluster { display: flex; align-items: center; gap: 1.5rem; }
         
-        .nav-icon-btn { position: relative; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: var(--white); font-size: 1.1rem; transition: all 0.3s ease; text-decoration: none; }
-        .nav-icon-btn:hover { background: var(--footer-link-hover); color: var(--secondary-color); transform: translateY(-2px); }
+        .nav-icon-btn { position: relative; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #fff; border: 1px solid #E6DCD3; color: var(--secondary-color); font-size: 1.1rem; transition: all 0.3s ease; text-decoration: none; }
+        .nav-icon-btn:hover { background: var(--bg-light); color: var(--primary-color); transform: translateY(-2px); border-color: var(--primary-color); }
 
         .user-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color); transition: transform 0.3s ease; background: #fff; }
         .profile-dropdown:hover .user-avatar { transform: scale(1.05); box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); }
@@ -81,7 +80,7 @@ header("Expires: 0");
         .bar { display: block; width: 25px; height: 3px; margin: 5px auto; background-color: var(--white); transition: 0.3s; }
 
         /* --- Main Product Section --- */
-        main { flex: 1; padding: 4rem 0 6rem; }
+        main { flex: 1; padding: 6rem 0 6rem; margin-top: 3rem; }
         
         .back-link { display: inline-flex; align-items: center; gap: 8px; color: #666; font-weight: 600; margin-bottom: 2rem; font-size: 0.95rem; }
         .back-link:hover { color: var(--primary-color); }
@@ -192,9 +191,8 @@ header("Expires: 0");
 
     <header class="header">
         <nav class="navbar container">
-            <a href="index.php" class="nav-logo">
-                <span class="logo-cafe"><span class="first-letter">C</span>afe</span>
-                <span class="logo-emmanuel"><span class="first-letter">E</span>mmanuel</span>
+                        <a href="index.php#home" class="nav-logo">
+                <img src="Logo_Brand.png" alt="Cafe Emmanuel Logo">
             </a>
             <ul class="nav-menu">
                 <li><a href="#home" class="nav-link active">Home</a></li>
