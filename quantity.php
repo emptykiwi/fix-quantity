@@ -195,10 +195,10 @@ header("Expires: 0");
                 <img src="Logo_Brand.png" alt="Cafe Emmanuel Logo">
             </a>
             <ul class="nav-menu">
-                <li><a href="#home" class="nav-link active">Home</a></li>
-                <li><a href="#menu" class="nav-link">Menu</a></li>
-                <li><a href="#about" class="nav-link">About</a></li>
-                <li><a href="#contact" class="nav-link">Contact</a></li>
+                <li><a href="index.php#home" class="nav-link active">Home</a></li>
+                <li><a href="index.php#menu" class="nav-link">Menu</a></li>
+                <li><a href="index.php#about" class="nav-link">About</a></li>
+                <li><a href="index.php#contact" class="nav-link">Contact</a></li>
                 <?php if (isset($_SESSION['user_id'])): ?>
                 <li><a href="my_orders.php" class="nav-link">My Orders</a></li>
                 <?php endif; ?>
